@@ -1,0 +1,6 @@
+.DS_Store
+
+# Seedrop ephemeral per-repo state (manifest + policy + continuity packets are committed)
+.seedrop/view/runs/
+.seedrop/view/signals/
+.seedrop/view/handoffs/

@@ -1,0 +1,30 @@
+{
+  "id": "4194821b-428d-49c7-b134-97315828870f",
+  "created_at": "2026-05-16T07:38:38.817Z",
+  "agent": "agent",
+  "mission": "AX Mission Reachability Audit v0.1 — define methodology, audit 2 sites, synthesize findings",
+  "summary": "Bootstrapped repo + acorn view. Drafted 5-phase reachability rubric (Discover/Resolve/Internalize/Complete/Verify, 0-3 each). Audited mczaykowski.com (site MRS 2.8) and stripe.com (site MRS 2.3 against synthetic mission set). Headline finding: two AX patterns exist (principal vs platform-docs) needing different rubrics; principal pattern is currently more mature; Verify is universally weakest phase; trust-packet adoption is the single highest-leverage change for platform-pattern sites. Synthesis in README.md. Codex independent audit + adversarial review pending in space ax-reachability.",
+  "decisions": [
+    "Split AX surfaces into two patterns: principal (mczaykowski.com) vs platform-docs (Stripe/Linear/Anthropic-docs). Methodology must declare pattern before scoring.",
+    "Use a synthesized default mission set for sites that don't declare missions, but flag scores as not absolutely comparable across patterns.",
+    "Keep Internalize and Complete as distinct phases for v0.2 despite some co-variance; revisit after more audits."
+  ],
+  "assumptions": [],
+  "open_threads": [
+    "Codex independent audit of one peer site (Linear or platform.claude.com recommended)",
+    "Codex adversarial review of methodology + synthesis",
+    "Decide whether to prototype axmra CLI as follow-up",
+    "Open methodology question: registry of default mission sets per pattern?",
+    "Open methodology question: third pattern beyond principal/platform?"
+  ],
+  "validation": {
+    "status": "skipped",
+    "commands": []
+  },
+  "changed_paths": [
+    "brief.md",
+    "README.md",
+    "audits/mczaykowski.com.json",
+    "audits/stripe.com.json"
+  ]
+}

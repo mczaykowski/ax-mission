@@ -1,0 +1,186 @@
+{
+  "schema_version": "ax-mra-0.1",
+  "target": "https://stripe.com",
+  "agent_api_root": null,
+  "audited_at": "2026-05-16T07:45:00Z",
+  "auditor": "claude",
+  "pattern": "platform-docs",
+  "pattern_note": "Stripe ships /llms.txt as a structured doc-index (per the Jeremy Howard llms.txt convention), with .md companion pages for each human doc. There is no /api/init, no declared missions, no trust packet. We score against a default mission set for a developer agent.",
+  "surface_fingerprint": {
+    "llms_txt": true,
+    "llms_full_txt": true,
+    "api_init": false,
+    "api_manifest": false,
+    "openapi": "external (REST API docs, not exposed as a single OpenAPI agent file)",
+    "evals_declared": false,
+    "content_hash": false,
+    "trust_packet": false,
+    "breaking_change_signal": false,
+    "dual_url_for_content": true,
+    "md_companions_per_doc": true
+  },
+  "declared_missions": [],
+  "default_mission_set_used": [
+    "find_capability",
+    "integrate_feature",
+    "api_reference",
+    "evaluate_pricing"
+  ],
+  "default_mission_set_rationale": "When a site does not declare missions, we apply a synthetic set covering the four canonical things a developer agent typically does with a platform-docs surface. Scores describe how reachable each is on the agent surface vs the human surface.",
+  "per_mission": [
+    {
+      "mission": "find_capability",
+      "question": "Does this platform support X?",
+      "primary_surfaces": ["/llms.txt"],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt is the index. Categories (Payments, Connect, Checkout, Billing, Tax, Issuing, ...) act as a typed-by-section capability map."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "llms.txt parses cleanly as Markdown. Companion .md pages resolve at predictable URLs."
+        },
+        "internalize": {
+          "score": 3,
+          "evidence": "Each link has a short typed-prose description of the capability ('Stripe Billing lets you bill and manage customers however you want…'). Agent can match capability → product name without prose body."
+        },
+        "complete": {
+          "score": 3,
+          "evidence": "Capability-existence question answerable purely from the index."
+        },
+        "verify": {
+          "score": 1,
+          "evidence": "No content_hash, no last_modified, no breaking_changes signal on /llms.txt or its companions. Agent cannot prove the doc is fresh — relies on 'page rendered'."
+        }
+      },
+      "mrs": 2.6
+    },
+    {
+      "mission": "integrate_feature",
+      "question": "How do I implement X end-to-end?",
+      "primary_surfaces": ["docs.stripe.com/<feature>.md", "/llms-full.txt"],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt links each product to its docs.stripe.com/<feature>.md. Pattern is consistent."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": ".md companions resolve cleanly; llms-full.txt offered as a single-file fallback."
+        },
+        "internalize": {
+          "score": 2,
+          "evidence": "Companion .md is human-readable prose with embedded code samples — strictly better than HTML for agents, but still narrative-shaped (you must read a paragraph to know which sample is the integration path). No typed steps[], no machine-readable integration manifest."
+        },
+        "complete": {
+          "score": 2,
+          "evidence": "An agent can usually generate the right integration by stitching code blocks from the .md. Friction when the doc says 'see also' or 'depending on your setup' — that branching is prose-bound."
+        },
+        "verify": {
+          "score": 1,
+          "evidence": "No freshness signal on .md companions. Agent cannot verify whether the integration path is the currently-recommended one."
+        }
+      },
+      "mrs": 2.2
+    },
+    {
+      "mission": "api_reference",
+      "question": "What's the exact API shape for X?",
+      "primary_surfaces": ["docs.stripe.com/api/*"],
+      "phases": {
+        "discover": {
+          "score": 2,
+          "evidence": "/llms.txt links 'Documentation > API Reference' but the per-endpoint surface is the human API explorer. There is no single OpenAPI URL surfaced at /llms.txt for agents to pull. (Stripe DOES ship an OpenAPI spec — but you have to know to look on GitHub.)"
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "Individual API doc pages resolve and are well-structured."
+        },
+        "internalize": {
+          "score": 2,
+          "evidence": "API docs use structured tables for params, but the canonical machine artifact (OpenAPI JSON) isn't linked from the agent surface. Agent reconstructs the shape from prose tables instead of typed schema."
+        },
+        "complete": {
+          "score": 3,
+          "evidence": "Reachable — Stripe API docs are extremely high quality even when read by an agent."
+        },
+        "verify": {
+          "score": 2,
+          "evidence": "Stripe surfaces API version (e.g. '2025-XX-XX' header) so agents CAN verify they're on a known version once they fetch — but the surface contract isn't versioned at /llms.txt level."
+        }
+      },
+      "mrs": 2.4
+    },
+    {
+      "mission": "evaluate_pricing",
+      "question": "What does this cost for use case Y?",
+      "primary_surfaces": ["stripe.com/<product>/pricing"],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt links per-product pricing pages explicitly (e.g. /billing/pricing, /tax/pricing, /connect/pricing)."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "Pricing pages resolve as HTML; .md companions exist for some."
+        },
+        "internalize": {
+          "score": 1,
+          "evidence": "Pricing pages are human-marketing pages with tier-and-feature tables in prose/HTML. No structured pricing JSON. Agent must scrape multi-column comparison tables and conditional pricing (volume tiers, country surcharges) from rendered text."
+        },
+        "complete": {
+          "score": 2,
+          "evidence": "Reachable but brittle — an agent answering 'what does it cost to accept 10k €100 payments in Germany' will produce a fragile answer dependent on prose parsing."
+        },
+        "verify": {
+          "score": 1,
+          "evidence": "No content_hash. Pricing changes silently."
+        }
+      },
+      "mrs": 2.0
+    }
+  ],
+  "site_mrs": 2.3,
+  "site_mrs_note": "Computed against the default mission set; not comparable in absolute terms to mczaykowski.com (3.0/2.6/2.6/3.0 across its own four missions) because the missions differ in kind. Comparable as a category signal.",
+  "gaps_identified": [
+    "No trust packet — content_hash / last_modified / breaking_changes_since absent across the AX surface. Caps Verify to ≤2 on every mission. Largest single gap.",
+    "No /api/init or equivalent mission-declaration surface — agents must infer 'what can I do here' from doc taxonomy",
+    "OpenAPI spec exists but not linked from /llms.txt — discoverability hole for api_reference mission",
+    "Pricing is the lowest-scoring mission across all peers: structured pricing JSON is industry-wide missing",
+    "/llms-full.txt is a useful escape hatch but token-heavy — no progressive disclosure (per-mission, per-capability slices)"
+  ],
+  "standout_strengths": [
+    "Doc-index llms.txt is well-organized and consistent — categorical surfaces map cleanly to product capabilities",
+    ".md companion for every human doc page — much higher reachability than HTML-only platforms",
+    "Section descriptions are typed-prose (concise capability claims), making find_capability genuinely reachable from the index alone",
+    "Predictable URL patterns enable agents to construct deep links by convention"
+  ],
+  "recommendations_to_principal": [
+    {
+      "rec_id": "S1",
+      "target_phase": "all missions.Verify",
+      "change": "Add a trust packet header (content_hash + last_modified + breaking_changes_since + schema_version) to /llms.txt and to every .md companion. Most asymmetric improvement available — single change lifts all four missions."
+    },
+    {
+      "rec_id": "S2",
+      "target_phase": "api_reference.Discover + Internalize",
+      "change": "Link the canonical OpenAPI JSON from /llms.txt under a clearly-typed 'agent_api_spec' entry. Agents currently have to know about it externally."
+    },
+    {
+      "rec_id": "S3",
+      "target_phase": "evaluate_pricing.Internalize",
+      "change": "Expose /api/pricing.json (per-product, with tiers/conditions as typed schema). Marketing pages can keep their visual presentation while agents get a deterministic source."
+    },
+    {
+      "rec_id": "S4",
+      "target_phase": "find_capability + integrate_feature",
+      "change": "Declare a mission set in /llms.txt (or a sibling /api/missions.json). Even an opinionated one — 'integrate_payments', 'integrate_billing', 'verify_identity' — gives calling agents a typed entry point instead of forcing them to read every section."
+    }
+  ],
+  "limitations_of_this_audit": [
+    "Default mission set is synthesized by the auditor — Stripe didn't declare these. Scoring is calibration-only; absolute MRS not comparable to mission-declaring sites.",
+    "We didn't deep-test the .md companion quality across the long tail of Stripe's catalogue. Spot-check was on Billing + Checkout sections.",
+    "Pricing-page audit assumes US/EUR/standard tiers; complex enterprise pricing pathways not surveyed."
+  ]
+}

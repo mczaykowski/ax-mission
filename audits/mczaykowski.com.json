@@ -1,0 +1,204 @@
+{
+  "schema_version": "ax-mra-0.1",
+  "target": "https://mczaykowski.com",
+  "agent_api_root": "https://api.mczaykowski.com",
+  "audited_at": "2026-05-16T07:35:00Z",
+  "auditor": "claude",
+  "surface_fingerprint": {
+    "llms_txt": true,
+    "api_init": true,
+    "api_manifest": true,
+    "openapi": true,
+    "evals_declared": true,
+    "evals_executable": false,
+    "content_hash": true,
+    "trust_packet": true,
+    "breaking_change_signal": true,
+    "dual_url_for_content": true
+  },
+  "declared_missions": [
+    "evaluate_collaboration",
+    "research_ideas",
+    "assess_expertise",
+    "prepare_introduction"
+  ],
+  "mission_to_endpoint_map_declared": true,
+  "per_mission": [
+    {
+      "mission": "evaluate_collaboration",
+      "primary_endpoints": ["/api/collaboration"],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/api/init recommended_endpoints maps mission=evaluate_collaboration to /api/collaboration explicitly. No guessing required."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "/api/collaboration returns parseable JSON with schema_version, content_hash, last_modified."
+        },
+        "internalize": {
+          "score": 3,
+          "evidence": "Fully typed fields: current_capacity (enum-like), preferred_engagement_types[], minimum_engagement_duration, industries_of_interest[], hard_no_list[], contact{email, preferred, response_time}. No prose required for fit decision."
+        },
+        "complete": {
+          "score": 3,
+          "evidence": "An agent can answer 'is collaboration possible and within scope?' end-to-end from structured data. Yes-fit / no-fit decision is reachable; hard_no_list[] disqualifies cleanly."
+        },
+        "verify": {
+          "score": 3,
+          "evidence": "content_hash sha256:f332..., last_modified, breaking_changes_since=null, schema_version=1.0 — current-state verification is deterministic."
+        }
+      },
+      "mrs": 3.0,
+      "notes": "Closest to gold standard reachability. Limitation: no rates/budget signal, so missions that include a budget question fall back to email — acceptable for the declared mission scope (evaluate fit, not evaluate cost)."
+    },
+    {
+      "mission": "research_ideas",
+      "primary_endpoints": ["/api/content/manifesto"],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/api/init maps research_ideas → /api/content/manifesto."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "Endpoint returns structured manifest with metadata, sections, claims, citation receipt, dual_urls{human, machine}."
+        },
+        "internalize": {
+          "score": 2,
+          "evidence": "Top-level claims are extractable as structured items (4 key assertions surfaced). But ~4,579-word body lives as prose in numbered sections; nuance requires prose parsing. Companion artifacts (/api/agentic-experience.md, /api/substrate-debt.md) are markdown, not typed objects."
+        },
+        "complete": {
+          "score": 2,
+          "evidence": "An agent can cite high-level claims with citation IDs and endpoint paths. But 'research mc's idea of substrate debt' deep enough to argue with it requires fetching markdown bodies — agent-readable, but prose-bound. Friction, not failure."
+        },
+        "verify": {
+          "score": 3,
+          "evidence": "Citation receipt includes machine_source, human_reference, confidence_level=authoritative_authored_content. content_hash on each artifact."
+        }
+      },
+      "mrs": 2.6,
+      "notes": "The deliberate design choice — manifesto IS prose with structured scaffolding — caps Internalize at 2 by definition. Acceptable trade-off but worth naming as a category: 'narrative content with claim manifest'."
+    },
+    {
+      "mission": "assess_expertise",
+      "primary_endpoints": ["/api/projects", "/api/skills"],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/api/init maps assess_expertise → /api/projects + /api/skills."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "Both endpoints return clean JSON with trust packet."
+        },
+        "internalize": {
+          "score": 2,
+          "evidence": "Skills typed (name, level∈{expert,advanced}, tags[]) but lack evidence_link, years, project_slugs[], so depth is not assertable from structure. Projects have evidence_level (typed), evidence_note (prose), summary (free-text prose). Agent can list, but assessing 'how deep does this expertise actually go' requires prose reading."
+        },
+        "complete": {
+          "score": 2,
+          "evidence": "'Is mc an expert in agent memory systems?' — answerable to self-claim level via /api/skills (level=expert) plus CCL project (evidence_level=private-live, 17/17 tests). But the test-pass figure lives in evidence_note prose. End-to-end completion requires extracting one prose field; reachable but friction."
+        },
+        "verify": {
+          "score": 3,
+          "evidence": "content_hash on both endpoints. evidence_level field provides typed honesty (self-claim vs public-live vs private-live)."
+        }
+      },
+      "mrs": 2.6,
+      "notes": "The structured/prose split is the dominant gap. evidence_level enum is excellent — pulls Verify up. Linking skills→projects→evidence as typed graph would lift this mission to ~3.0."
+    },
+    {
+      "mission": "prepare_introduction",
+      "primary_endpoints": ["/api/contact"],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/api/init maps prepare_introduction → /api/contact."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "Returns JSON with trust packet."
+        },
+        "internalize": {
+          "score": 3,
+          "evidence": "Highly structured: email, preferred channel, response_time, typed_contact_endpoint{method=POST, path, url, purpose, body_schema{intent∈{hire|collaborate|advise|question}, from, context, agent_name, human_name}}. The body schema is itself typed."
+        },
+        "complete": {
+          "score": 3,
+          "evidence": "Agent can POST a fully-formed structured intro per body_schema without any prose composition. Required-fields rule for autonomous agents (human's name + goal) is explicit and structured."
+        },
+        "verify": {
+          "score": 3,
+          "evidence": "content_hash present. No ambiguity on protocol."
+        }
+      },
+      "mrs": 3.0,
+      "notes": "Gold standard for this mission. typed_contact_endpoint.body_schema is the load-bearing pattern — should be lifted as a reusable contract across the ecosystem."
+    }
+  ],
+  "site_mrs": 2.8,
+  "gaps_identified": [
+    "Skills lack evidence_link / years / project_slug[] — caps assess_expertise.Internalize at 2",
+    "Project summaries are free-text prose; structured key_claims[] would unlock deeper internalization",
+    "Evals declared in /api/evals are descriptive only — POST /api/agent-reports exists but no /api/evals/run, so Verify can't include an executable eval-pass signal",
+    "Manifesto body is prose by design — acceptable, but caps research_ideas.Internalize at 2 inherently",
+    "/api/collaboration has no rate signal or pricing-policy flag — missions that include budget fall back to email"
+  ],
+  "standout_strengths": [
+    "Explicit mission→endpoint mapping in /api/init (rare in the wild)",
+    "Trust packet (content_hash + last_modified + breaking_changes_since + schema_version) on every endpoint",
+    "typed_contact_endpoint.body_schema makes prepare_introduction a structured POST, not a prose email composition task",
+    "evidence_level enum (self-claim | public-live | private-live) — typed honesty",
+    "Eval anti-patterns are explicit, not just success criteria",
+    "Citation receipt includes confidence_level on authored content",
+    "Dual URL (human + machine) for narrative content with machine_source as citation"
+  ],
+  "recommendations_to_principal": [
+    {
+      "rec_id": "R1",
+      "target_phase": "assess_expertise.Internalize",
+      "current": 2,
+      "projected": 3,
+      "change": "Add { evidence_link, years_practiced, project_slugs[] } to each /api/skills entry."
+    },
+    {
+      "rec_id": "R2",
+      "target_phase": "assess_expertise.Complete + research_ideas.Internalize",
+      "current": "2 / 2",
+      "projected": "3 / 2.5",
+      "change": "Add structured key_claims[] (typed array of {claim, evidence_link, confidence}) to /api/projects entries alongside the prose summary."
+    },
+    {
+      "rec_id": "R3",
+      "target_phase": "evaluate_collaboration.Complete",
+      "current": 3,
+      "projected": "3 (no change)",
+      "change": "Add a pricing_policy enum to /api/collaboration (e.g. 'rates_in_conversation' | 'public_rate_card' | 'fixed_engagement_only') so budget-bearing missions know whether to expect a programmatic answer or fall through to email."
+    },
+    {
+      "rec_id": "R4",
+      "target_phase": "all missions.Verify",
+      "current": 3,
+      "projected": "3+ (executable verify)",
+      "change": "Expose POST /api/evals/run that accepts an agent's eval answers and returns pass/fail per eval. Turns Verify from 'I checked the hash' into 'I passed the principal's eval'. Would also let other AX sites adopt eval-as-contract."
+    },
+    {
+      "rec_id": "R5",
+      "target_phase": "research_ideas.Internalize",
+      "current": 2,
+      "projected": "2.5",
+      "change": "Optional: emit a /api/content/manifesto/claims endpoint that returns just the structured key_claims[] without the prose body, for agents that only need the spine."
+    }
+  ],
+  "open_questions_for_principal": [
+    "Are the 4 declared missions the right cut, or is there a fifth (e.g. assess_alignment / vet_for_hire / co-author) that's de facto being served via /api/contact?",
+    "Should /api/evals expose a /run executor so eval-pass becomes a typed claim a calling agent can prove and forward?"
+  ],
+  "limitations_of_this_audit": [
+    "Single-auditor pass (claude). Codex independent audit not yet incorporated.",
+    "Scoring is qualitative; calibrated within this audit but not yet against any reference standard.",
+    "We did not test authenticated paths (none required by declared missions, but worth naming).",
+    "POST attempts were not executed (out of session scope and politeness — we did not actually submit a contact form)."
+  ]
+}

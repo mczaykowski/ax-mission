@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "workspace_id": "ax-research",
+  "root": ".",
+  "updated_at": "2026-05-16T15:27:21.779Z",
+  "files": [
+    {
+      "path": ".gitignore",
+      "kind": "config",
+      "size_bytes": 168,
+      "hash": "f66abd405934dfbe7698ab992324e95cda37903492fbfca79e0dd862d5e61cee"
+    },
+    {
+      "path": "audits/mczaykowski.com.json",
+      "kind": "config",
+      "size_bytes": 10522,
+      "hash": "cb145269d91585fd1691110d71277903d5ccd8699dfae5490abb9148dabcd92f",
+      "purpose": "Audit of mczaykowski.com (principal pattern). Site MRS 2.8."
+    },
+    {
+      "path": "audits/stripe.com.json",
+      "kind": "config",
+      "size_bytes": 9660,
+      "hash": "c670e71da4c3d9738a1841bad8555e577b4e2ca9da1b4080df128251a43aca2e",
+      "purpose": "Audit of stripe.com (platform-docs pattern) against synthetic mission set. Site MRS 2.3."
+    },
+    {
+      "path": "brief.md",
+      "kind": "doc",
+      "size_bytes": 5616,
+      "hash": "bc424448fe36c04438e8a390168045a075798b6c078ec8c8fc209013f736d248",
+      "purpose": "MRA v0.1 methodology — 5-phase rubric (Discover/Resolve/Internalize/Complete/Verify), scoring conventions, pattern split (principal vs platform-docs)."
+    },
+    {
+      "path": "README.md",
+      "kind": "doc",
+      "size_bytes": 8930,
+      "hash": "2114cc924446c95038ad0a31a02b979e73df1e6e3259b8d2a28bbe697ddd001a",
+      "purpose": "Synthesis of v0.1 findings across audited sites; headline conclusions and open methodology questions."
+    }
+  ],
+  "path_purposes": [
+    {
+      "path": "audits/mczaykowski.com.json",
+      "purpose": "Audit of mczaykowski.com (principal pattern). Site MRS 2.8."
+    },
+    {
+      "path": "audits/stripe.com.json",
+      "purpose": "Audit of stripe.com (platform-docs pattern) against synthetic mission set. Site MRS 2.3."
+    },
+    {
+      "path": "brief.md",
+      "purpose": "MRA v0.1 methodology — 5-phase rubric (Discover/Resolve/Internalize/Complete/Verify), scoring conventions, pattern split (principal vs platform-docs)."
+    },
+    {
+      "path": "README.md",
+      "purpose": "Synthesis of v0.1 findings across audited sites; headline conclusions and open methodology questions."
+    }
+  ],
+  "recommended_reads": [
+    {
+      "path": "brief.md",
+      "reason": "Methodology — read before interpreting any audit",
+      "priority": 1
+    },
+    {
+      "path": "README.md",
+      "reason": "Project overview",
+      "priority": 1
+    },
+    {
+      "path": "audits/mczaykowski.com.json",
+      "reason": "Principal-pattern reference audit",
+      "priority": 3
+    },
+    {
+      "path": "audits/stripe.com.json",
+      "reason": "Platform-docs-pattern reference audit",
+      "priority": 4
+    }
+  ]
+}
