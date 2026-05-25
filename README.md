@@ -1,143 +1,233 @@
-# Mission Reachability Audit (MRA) — v0.1 Findings
+# AX Mission Standard
 
-**Date:** 2026-05-16
-**Auditor:** claude (peer reviewer: codex — pending)
-**Repo:** `/Users/mc/Projects/ax-research`
-**Methodology:** [`brief.md`](./brief.md) · **Audits:** [`audits/`](./audits/)
+**Version:** 0.1  
+**Status:** Draft, implementation-ready  
+**Purpose:** A minimal machine-readable manifest that tells agents what jobs they can do, which surfaces to use, what authorization is required, and how to verify freshness and success.
 
-> AX-first sites declare *missions* — what a calling agent should be able to do with them. The methodology question this report opens: **declared is not the same as reachable**. We score five phases (Discover, Resolve, Internalize, Complete, Verify) per mission, 0–3 each, and average to a Mission Reachability Score.
+AX means **Agent Experience**. It is not "docs for agents." AX is the contract between a site and a calling agent.
 
-## Headline findings
+The smallest useful contract is a mission manifest.
 
-### 1. Two AX patterns exist, and they need different rubrics
+## Why This Exists
 
-Sites that ship "agent-readable surfaces" today split cleanly into two patterns:
+Our Mission Reachability Audit found the same gap across otherwise strong agent-readable sites:
 
-| Pattern | Example | What it declares | What it serves |
-|---------|---------|------------------|----------------|
-| **Principal** | `mczaykowski.com` | Declared missions, mission→endpoint map, typed POST contract | Representing/citing/contacting a human or entity |
-| **Platform-docs** | `stripe.com`, `linear.app`, `docs.anthropic.com` | Doc-index `llms.txt` with `.md` companions | Instructing an agent to use a product |
+- `/llms.txt` helps agents discover docs, but rarely declares valid jobs.
+- Human docs can explain workflows, but do not define machine success conditions.
+- OpenAPI and GraphQL schemas describe endpoints, but not missions.
+- Pricing pages expose business data, but not stable machine pricing contracts.
+- HTTP `ETag` and `Last-Modified` help, but are not a site-owned trust packet.
 
-A site can be auditable in *both* patterns — but the missions differ in kind. Principal missions are relational (`prepare_introduction`, `evaluate_collaboration`). Platform missions are operational (`integrate_feature`, `evaluate_pricing`). You can't score one against the other as if they were the same thing.
+The missing layer is a compact manifest that says:
 
-This split should be made first-class in any future MRA methodology — the auditor declares the pattern, and the rubric selects an appropriate default mission set when missions aren't declared by the site.
+1. what missions are supported
+2. which surfaces are authoritative for each mission
+3. whether authentication or side effects are involved
+4. what inputs and outputs are expected
+5. how the agent can verify freshness, authority, and completion
 
-### 2. The principal pattern is currently the more mature surface
+## Quick Start
 
-Counter-intuitive but real: a single individual's site (`mczaykowski.com`, site MRS **2.8**) demonstrates more agent-native discipline than the largest dev-tool platforms (`stripe.com`, site MRS **2.3** against a synthetic default mission set).
+Publish this file at one of these locations:
 
-What the principal pattern does better:
-- Declares missions explicitly and maps each to specific endpoints
-- Ships a trust packet (`content_hash` + `last_modified` + `breaking_changes_since` + `schema_version`) on every endpoint
-- Returns typed JSON at every step — body schemas for POST endpoints are themselves typed
-- Includes structured trust signals like `evidence_level ∈ {self-claim, public-live, private-live}` and citation confidence
-
-This is asymmetric in a way worth naming: **the discipline that scales easily on a small surface is the discipline most absent at scale.**
-
-### 3. `Verify` is the universally weakest phase
-
-Across both audits, `Verify` is the phase that drags MRS down most.
-
-| Site | Verify scores by mission |
-|------|--------------------------|
-| mczaykowski.com | 3 / 3 / 3 / 3 |
-| stripe.com | 1 / 1 / 2 / 1 |
-
-The principal pattern fixed Verify by shipping a trust packet on every endpoint. The platform pattern hasn't. Adding `content_hash + last_modified + breaking_changes_since` to `/llms.txt` and `.md` companions is the **single highest-leverage change** any platform-docs site can make. It would lift Stripe's site MRS by ~0.2 on its own.
-
-### 4. AI companies don't fully eat their own dog food
-
-We probed `anthropic.com`, `openai.com`, `vercel.com`, `stripe.com`, `linear.app`, `docs.anthropic.com`:
-
-- ✅ `stripe.com/llms.txt`, `linear.app/llms.txt`, `vercel.com/llms.txt` — present
-- ✅ `docs.anthropic.com/llms.txt` (redirects to platform.claude.com) — present
-- ❌ `anthropic.com/llms.txt` — 404
-- ❌ `openai.com/llms.txt` — 403
-
-The product docs (`docs.anthropic.com`) ship the doc-index pattern. The corporate root (`anthropic.com`) doesn't. The mismatch is a small but loud signal: even AI companies treat AX as a documentation feature, not a company feature.
-
-### 5. Methodology insight: `Internalize` and `Complete` *can* merge
-
-A reviewer (codex, when they audit) should challenge: are five phases necessary, or do `Internalize` and `Complete` always co-vary? In our two audits they didn't perfectly co-vary — mczaykowski.com's `research_ideas` scores 2/2 (prose-bound), but Stripe's `find_capability` scores 3/3 (operationally complete from the index alone). They measure different things in principle; in practice the difference appears smallest on declarative missions and largest on integrative missions. Worth keeping as separate phases for v0.2 and revisiting after more audits.
-
-## Per-site scorecards
-
-### mczaykowski.com — principal-pattern
-
-| Mission | Discover | Resolve | Internalize | Complete | Verify | MRS |
-|---------|:--------:|:-------:|:-----------:|:--------:|:------:|:---:|
-| evaluate_collaboration | 3 | 3 | 3 | 3 | 3 | **3.0** |
-| research_ideas | 3 | 3 | 2 | 2 | 3 | **2.6** |
-| assess_expertise | 3 | 3 | 2 | 2 | 3 | **2.6** |
-| prepare_introduction | 3 | 3 | 3 | 3 | 3 | **3.0** |
-| **Site MRS** | | | | | | **2.8** |
-
-**Detail:** [`audits/mczaykowski.com.json`](./audits/mczaykowski.com.json)
-
-### stripe.com — platform-docs (synthetic mission set)
-
-| Mission | Discover | Resolve | Internalize | Complete | Verify | MRS |
-|---------|:--------:|:-------:|:-----------:|:--------:|:------:|:---:|
-| find_capability | 3 | 3 | 3 | 3 | 1 | **2.6** |
-| integrate_feature | 3 | 3 | 2 | 2 | 1 | **2.2** |
-| api_reference | 2 | 3 | 2 | 3 | 2 | **2.4** |
-| evaluate_pricing | 3 | 3 | 1 | 2 | 1 | **2.0** |
-| **Site MRS** | | | | | | **2.3** |
-
-**Detail:** [`audits/stripe.com.json`](./audits/stripe.com.json)
-
-> Stripe site MRS is not comparable in absolute terms to mczaykowski.com — different mission set, different pattern. Comparable as a category signal.
-
-## What would move the field
-
-Concretely, in order of leverage:
-
-1. **Universal trust packets.** Add `content_hash + last_modified + breaking_changes_since + schema_version` to every agent-readable artifact (`/llms.txt`, `.md` companions, JSON endpoints). Single largest move; lifts `Verify` everywhere.
-
-2. **Declared mission sets, even opinionated ones.** A platform that names three or four missions an agent can attempt (`integrate_payments`, `verify_identity`, ...) is dramatically more reachable than one that requires agents to derive missions from a doc taxonomy.
-
-3. **Typed pricing JSON.** Of the four missions audited on a platform, `evaluate_pricing` scored lowest by a wide margin. Marketing pages stay marketing pages; agents need `/api/pricing.json`.
-
-4. **OpenAPI linked from `/llms.txt`.** Stripe ships a public OpenAPI spec but agents have to know it exists — discoverability hole.
-
-5. **Eval-as-contract.** mczaykowski.com declares evals but they aren't executable (`POST /api/evals/run` doesn't exist). Making evals runnable would turn `Verify` from "I checked the hash" into "I passed the principal's eval" — a real trust upgrade.
-
-## Open methodology questions
-
-- Should there be a **registry of default mission sets per pattern** so non-declaring sites are still scoreable on a fair basis? (Right now we synthesized one for Stripe; the synthesis is the auditor's bias.)
-- Is the **principal/platform split** complete, or is there a third pattern (e.g. dataset/registry, multi-agent service) that needs its own rubric?
-- Is `Verify` still doing distinct work once `Internalize` includes content-hash checking, or are they collapsing into one phase?
-- What's the right v0.2 of the methodology if we want **two independent auditors agreeing within ±0.3 MRS** on the same site?
-
-## Limitations of v0.1
-
-- Two audits is the smallest possible audit set. n=2 means everything here is provisional.
-- Auditor count = 1 (claude). Inter-rater reliability is undefined until codex (or a third) runs an independent audit.
-- Scoring is calibrated within the audit set, not against any external standard.
-- We did not actually exercise POST endpoints (out of politeness — we did not submit a contact form to anyone).
-- Performance, authentication, multi-turn behavior — all out of scope this pass.
-
-## Next steps
-
-- [ ] Codex independent audit of one peer site (currently held: Linear or platform.claude.com would be most informative).
-- [ ] Codex adversarial review of methodology and synthesis.
-- [ ] Optional: prototype `axmra` CLI — `axmra audit <url>` produces an audit JSON to this schema. Even a scaffolded harness is useful.
-- [ ] Optional follow-up paper: substrate-debt index (the prose-vs-typed gap measured across sites), which uses MRA data as input.
-
-## Repository
-
+```text
+https://example.com/.well-known/ax-mission.json
+https://example.com/agent.json
+https://example.com/api/init
 ```
+
+The canonical location for v0.1 is:
+
+```text
+/.well-known/ax-mission.json
+```
+
+Minimal manifest:
+
+```json
+{
+  "schema_version": "0.1",
+  "id": "com.example",
+  "name": "Example",
+  "description": "Example publishes machine-readable missions for calling agents.",
+  "updated_at": "2026-05-25T00:00:00Z",
+  "missions": [
+    {
+      "id": "find_capability",
+      "title": "Find a capability",
+      "description": "Answer whether Example supports a requested capability.",
+      "category": "platform",
+      "surfaces": [
+        {
+          "url": "https://example.com/llms.txt",
+          "type": "documentation",
+          "format": "text/markdown",
+          "required": true
+        }
+      ],
+      "auth": {
+        "required": false
+      },
+      "input_schema": {
+        "type": "object",
+        "required": ["capability"],
+        "properties": {
+          "capability": { "type": "string" }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "required": ["answer", "sources", "confidence"],
+        "properties": {
+          "answer": { "type": "string" },
+          "sources": { "type": "array", "items": { "type": "string", "format": "uri" } },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "additionalProperties": false
+      },
+      "success": [
+        {
+          "id": "answer_with_sources",
+          "description": "Return a direct answer with source URLs and confidence.",
+          "verify_with": "source_urls_resolve"
+        }
+      ],
+      "verify": {
+        "freshness": "Use manifest updated_at and linked surface headers.",
+        "authority": "Use only URLs under example.com unless explicitly delegated.",
+        "success_contract": "The response must satisfy output_schema and include at least one source URL."
+      }
+    }
+  ],
+  "trust": {
+    "updated_at": "2026-05-25T00:00:00Z",
+    "authority": "https://example.com",
+    "generated_by": "example-docs-build",
+    "content_hashes": [
+      {
+        "url": "https://example.com/llms.txt",
+        "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      }
+    ],
+    "breaking_changes_since": null
+  }
+}
+```
+
+Validate an implementation:
+
+```bash
+node tools/validate-agent-json.mjs examples/minimal.agent.json
+```
+
+Validate every bundled example:
+
+```bash
+npm test
+```
+
+## What v0.1 Defines
+
+The v0.1 standard defines one artifact: an **AX Mission Manifest**.
+
+A manifest contains:
+
+| Field | Required | Purpose |
+|---|---:|---|
+| `schema_version` | yes | Must be `"0.1"` for this version. |
+| `id` | yes | Stable reverse-DNS style identifier for the publisher. |
+| `name` | yes | Human-readable publisher name. |
+| `description` | yes | Short description of the manifest's scope. |
+| `updated_at` | yes | ISO 8601 timestamp for manifest freshness. |
+| `missions` | yes | One or more supported agent jobs. |
+| `trust` | yes | Site-owned freshness, authority, and integrity metadata. |
+
+Each mission contains:
+
+| Field | Required | Purpose |
+|---|---:|---|
+| `id` | yes | Stable snake_case mission identifier. |
+| `title` | yes | Human-readable mission name. |
+| `description` | yes | What the agent is expected to do. |
+| `category` | yes | `principal`, `platform`, `protocol`, `commerce`, `support`, or `other`. |
+| `surfaces` | yes | Authoritative docs, APIs, schemas, or tools for the mission. |
+| `auth` | yes | Whether credentials, scopes, or account state are required. |
+| `input_schema` | yes | JSON Schema for mission input. |
+| `output_schema` | yes | JSON Schema for mission output. |
+| `success` | yes | Machine-checkable or operator-checkable completion criteria. |
+| `verify` | yes | Freshness, authority, and success-contract guidance. |
+
+## Repository Layout
+
+```text
 .
-├── README.md             # this synthesis
-├── brief.md              # methodology v0.1
-└── audits/
-    ├── mczaykowski.com.json
-    └── stripe.com.json
+├── README.md
+├── spec/
+│   └── ax-mission-standard-v0.1.md
+├── schemas/
+│   ├── ax-mission-manifest.v0.1.schema.json
+│   └── mission.v0.1.schema.json
+├── examples/
+│   ├── minimal.agent.json
+│   ├── principal.agent.json
+│   └── platform.agent.json
+├── tools/
+│   ├── validate-agent-json.mjs
+│   └── check-audits.mjs
+├── research/
+│   └── mission-reachability-audit.md
+├── audits/
+│   ├── mczaykowski.com.json
+│   ├── stripe.com.json
+│   ├── linear.app.json
+│   ├── platform.claude.com.json
+│   └── vercel.com.json
+└── brief.md
 ```
 
-## Provenance
+## Adoption Levels
 
-- Lead: claude (passport: `/Users/mc/.acorn/id/agents/claude.json`)
-- Coordination: AcornKit space `ax-reachability` (id `ax-reachability-46ab842c`)
-- Acorn view: bootstrapped at repo root; continuity packet to be written on close
-- Principal: mc (operator)
+| Level | Name | Requirement | Value |
+|---:|---|---|---|
+| 0 | Discoverable | Publish `/llms.txt` or equivalent. | Agents can find docs. |
+| 1 | Missioned | Publish an AX Mission Manifest. | Agents know valid jobs and surfaces. |
+| 2 | Contracted | Add schemas, success criteria, and auth scopes. | Agents can plan and produce bounded outputs. |
+| 3 | Verifiable | Add hashes, versioning, evals, or validation endpoints. | Agents can prove freshness and completion. |
+
+v0.1 is designed to make Level 1 cheap and Level 2 practical.
+
+## Design Constraints
+
+- Small enough for a team to ship in one pull request.
+- Strict enough that agents do not have to infer core jobs from prose.
+- Compatible with existing `/llms.txt`, OpenAPI, GraphQL, MCP, CLI, and docs surfaces.
+- Honest about side effects and authentication.
+- Verifiable by static schema and simple runtime checks.
+
+## Research Basis
+
+This standard is grounded in the Mission Reachability Audit work in [`research/mission-reachability-audit.md`](./research/mission-reachability-audit.md).
+
+Audited examples include:
+
+- `mczaykowski.com`
+- `stripe.com`
+- `linear.app`
+- `platform.claude.com/docs`
+- `vercel.com`
+
+The audit conclusion is direct: useful agent-readable docs already exist, but the missing high-value layer is declared missions plus verification.
+
+## Versioning
+
+v0.1 is intentionally narrow. Future versions may add:
+
+- detached signatures
+- standardized eval endpoints
+- pricing contract schema
+- permission and consent profiles
+- compatibility registry for discovery locations
+- conformance test suite
+
+Breaking changes must increment the minor version and include migration notes.

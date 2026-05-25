@@ -1,0 +1,239 @@
+{
+  "schema_version": "0.1",
+  "id": "com.example.platform",
+  "name": "Example Platform",
+  "description": "Platform missions for deploying software, using APIs, and evaluating pricing.",
+  "updated_at": "2026-05-25T00:00:00Z",
+  "publisher": {
+    "name": "Example Platform Inc.",
+    "url": "https://platform.example.com"
+  },
+  "entrypoints": [
+    {
+      "url": "https://platform.example.com/.well-known/ax-mission.json",
+      "type": "canonical",
+      "description": "Canonical AX Mission Manifest"
+    },
+    {
+      "url": "https://platform.example.com/agent.json",
+      "type": "compatibility",
+      "description": "Compatibility manifest for agents that probe /agent.json"
+    }
+  ],
+  "links": [
+    {
+      "url": "https://platform.example.com/llms.txt",
+      "type": "llms_txt",
+      "description": "Agent-readable docs index"
+    },
+    {
+      "url": "https://platform.example.com/openapi.json",
+      "type": "openapi",
+      "description": "REST API contract"
+    }
+  ],
+  "missions": [
+    {
+      "id": "deploy_app",
+      "title": "Deploy an app",
+      "description": "Deploy a project to a preview or production environment.",
+      "category": "platform",
+      "surfaces": [
+        {
+          "url": "https://platform.example.com/docs/cli/deploy",
+          "type": "cli",
+          "format": "text/markdown",
+          "required": true
+        },
+        {
+          "url": "https://platform.example.com/openapi.json",
+          "type": "schema",
+          "format": "openapi",
+          "required": false
+        }
+      ],
+      "auth": {
+        "required": true,
+        "type": "account",
+        "scopes": [
+          "deployment.write",
+          "project.read"
+        ],
+        "side_effects": "write",
+        "human_approval_required": true
+      },
+      "input_schema": {
+        "type": "object",
+        "required": [
+          "project_path",
+          "target"
+        ],
+        "properties": {
+          "project_path": {
+            "type": "string"
+          },
+          "target": {
+            "enum": [
+              "preview",
+              "production"
+            ]
+          },
+          "skip_domain": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "required": [
+          "deployment_url",
+          "target",
+          "status"
+        ],
+        "properties": {
+          "deployment_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "target": {
+            "enum": [
+              "preview",
+              "production"
+            ]
+          },
+          "status": {
+            "enum": [
+              "created",
+              "failed"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "success": [
+        {
+          "id": "deployment_url_returned",
+          "description": "The deployment command returns a deployment URL on stdout or through the API response.",
+          "verify_with": "cli_stdout_or_api_response"
+        },
+        {
+          "id": "failure_is_detectable",
+          "description": "A nonzero CLI exit code or non-2xx API response is treated as failure.",
+          "verify_with": "exit_code_or_http_status"
+        }
+      ],
+      "verify": {
+        "freshness": "Use manifest trust metadata, docs last_updated metadata, and OpenAPI ETag.",
+        "authority": "Use only platform.example.com docs and API contracts.",
+        "success_contract": "The resulting deployment must satisfy output_schema and include a resolvable deployment URL."
+      }
+    },
+    {
+      "id": "evaluate_pricing",
+      "title": "Evaluate pricing",
+      "description": "Determine which plan and usage model fits a requested workload.",
+      "category": "commerce",
+      "surfaces": [
+        {
+          "url": "https://platform.example.com/pricing.json",
+          "type": "api",
+          "format": "application/json",
+          "required": true
+        },
+        {
+          "url": "https://platform.example.com/docs/pricing",
+          "type": "documentation",
+          "format": "text/markdown",
+          "required": false
+        }
+      ],
+      "auth": {
+        "required": false,
+        "type": "none",
+        "side_effects": "none",
+        "human_approval_required": false
+      },
+      "input_schema": {
+        "type": "object",
+        "required": [
+          "usage"
+        ],
+        "properties": {
+          "usage": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "region": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "required": [
+          "recommended_plan",
+          "estimated_cost",
+          "assumptions",
+          "sources"
+        ],
+        "properties": {
+          "recommended_plan": {
+            "type": "string"
+          },
+          "estimated_cost": {
+            "type": "number",
+            "minimum": 0
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "success": [
+        {
+          "id": "estimate_has_sources",
+          "description": "The estimate includes the pricing source and assumptions used.",
+          "verify_with": "pricing_json_hash"
+        }
+      ],
+      "verify": {
+        "freshness": "Use pricing JSON updated_at and content hash.",
+        "authority": "Use the pricing JSON URL declared in this mission.",
+        "success_contract": "The estimate must cite plan IDs and resource IDs from pricing.json."
+      }
+    }
+  ],
+  "trust": {
+    "updated_at": "2026-05-25T00:00:00Z",
+    "authority": "https://platform.example.com",
+    "generated_by": "docs-build",
+    "content_hashes": [
+      {
+        "url": "https://platform.example.com/llms.txt",
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      {
+        "url": "https://platform.example.com/openapi.json",
+        "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    ],
+    "breaking_changes_since": null,
+    "expires_at": "2026-06-25T00:00:00Z",
+    "changelog": "https://platform.example.com/docs/agent-changelog"
+  }
+}

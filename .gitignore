@@ -1,6 +1,6 @@
 .DS_Store
+node_modules/
+npm-debug.log*
 
-# Seedrop ephemeral per-repo state (manifest + policy + continuity packets are committed)
-.seedrop/view/runs/
-.seedrop/view/signals/
-.seedrop/view/handoffs/
+# Local coordination state
+.seedrop/

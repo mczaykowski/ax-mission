@@ -1,0 +1,102 @@
+{
+  "schema_version": "0.1",
+  "id": "com.example",
+  "name": "Example",
+  "description": "Example publishes machine-readable missions for calling agents.",
+  "updated_at": "2026-05-25T00:00:00Z",
+  "publisher": {
+    "name": "Example",
+    "url": "https://example.com"
+  },
+  "entrypoints": [
+    {
+      "url": "https://example.com/.well-known/ax-mission.json",
+      "type": "canonical",
+      "description": "Canonical AX Mission Manifest"
+    }
+  ],
+  "missions": [
+    {
+      "id": "find_capability",
+      "title": "Find a capability",
+      "description": "Answer whether Example supports a requested capability.",
+      "category": "platform",
+      "surfaces": [
+        {
+          "url": "https://example.com/llms.txt",
+          "type": "documentation",
+          "format": "text/markdown",
+          "required": true
+        }
+      ],
+      "auth": {
+        "required": false,
+        "type": "none",
+        "side_effects": "none",
+        "human_approval_required": false
+      },
+      "input_schema": {
+        "type": "object",
+        "required": [
+          "capability"
+        ],
+        "properties": {
+          "capability": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "required": [
+          "answer",
+          "sources",
+          "confidence"
+        ],
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "success": [
+        {
+          "id": "answer_with_sources",
+          "description": "Return a direct answer with source URLs and confidence.",
+          "verify_with": "source_urls_resolve"
+        }
+      ],
+      "verify": {
+        "freshness": "Use manifest updated_at and linked surface headers.",
+        "authority": "Use only URLs under example.com unless explicitly delegated.",
+        "success_contract": "The response must satisfy output_schema and include at least one source URL."
+      }
+    }
+  ],
+  "trust": {
+    "updated_at": "2026-05-25T00:00:00Z",
+    "authority": "https://example.com",
+    "generated_by": "example-docs-build",
+    "content_hashes": [
+      {
+        "url": "https://example.com/llms.txt",
+        "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      }
+    ],
+    "breaking_changes_since": null
+  }
+}

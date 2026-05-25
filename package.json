@@ -1,0 +1,16 @@
+{
+  "name": "ax-mission-standard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AX Mission Standard v0.1: a minimal mission manifest for agent-readable websites.",
+  "type": "module",
+  "scripts": {
+    "validate": "node tools/validate-agent-json.mjs examples/minimal.agent.json examples/principal.agent.json examples/platform.agent.json",
+    "check:audits": "node tools/check-audits.mjs",
+    "test": "npm run validate",
+    "test:all": "npm run validate && npm run check:audits"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

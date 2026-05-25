@@ -1,0 +1,374 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ax-mission.org/schemas/ax-mission-manifest.v0.1.schema.json",
+  "title": "AX Mission Manifest v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "description",
+    "updated_at",
+    "missions",
+    "trust"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(\\.[a-z0-9][a-z0-9-]*)+$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "publisher": {
+      "$ref": "#/$defs/publisher"
+    },
+    "entrypoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/link"
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/link"
+      }
+    },
+    "contact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "security": {
+          "type": "string",
+          "format": "uri"
+        },
+        "support": {
+          "type": "string",
+          "format": "uri"
+        },
+        "standards": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "missions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/mission"
+      }
+    },
+    "trust": {
+      "$ref": "#/$defs/trust"
+    }
+  },
+  "$defs": {
+    "publisher": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "url"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "link": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url",
+        "type"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "mission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "description",
+        "category",
+        "surfaces",
+        "auth",
+        "input_schema",
+        "output_schema",
+        "success",
+        "verify"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "category": {
+          "enum": [
+            "principal",
+            "platform",
+            "protocol",
+            "commerce",
+            "support",
+            "other"
+          ]
+        },
+        "surfaces": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/surface"
+          }
+        },
+        "auth": {
+          "$ref": "#/$defs/auth"
+        },
+        "input_schema": {
+          "type": "object"
+        },
+        "output_schema": {
+          "type": "object"
+        },
+        "success": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/success"
+          }
+        },
+        "verify": {
+          "$ref": "#/$defs/mission_verify"
+        }
+      }
+    },
+    "surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url",
+        "type",
+        "format",
+        "required"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "documentation",
+            "api",
+            "schema",
+            "mcp",
+            "cli",
+            "eval",
+            "fixture",
+            "contact",
+            "other"
+          ]
+        },
+        "format": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required"
+      ],
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "type": {
+          "enum": [
+            "none",
+            "api_key",
+            "oauth",
+            "session",
+            "account",
+            "other"
+          ]
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "side_effects": {
+          "enum": [
+            "none",
+            "read",
+            "write",
+            "external_effect",
+            "unknown"
+          ]
+        },
+        "human_approval_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "success": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "description",
+        "verify_with"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verify_with": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "mission_verify": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "freshness",
+        "authority",
+        "success_contract"
+      ],
+      "properties": {
+        "freshness": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1
+        },
+        "success_contract": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "trust": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "updated_at",
+        "authority"
+      ],
+      "properties": {
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "authority": {
+          "type": "string",
+          "format": "uri"
+        },
+        "generated_by": {
+          "type": "string"
+        },
+        "content_hashes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/content_hash"
+          }
+        },
+        "breaking_changes_since": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "changelog": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "content_hash": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url",
+        "sha256"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    }
+  }
+}

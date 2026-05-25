@@ -1,0 +1,198 @@
+{
+  "schema_version": "1.0",
+  "target": "https://linear.app",
+  "audited_at": "2026-05-25T08:55:00Z",
+  "auditor": "codex",
+  "pattern": "platform-docs",
+  "pattern_note": "Linear ships a documentation index at /llms.txt plus Markdown companions and a public developer surface. It does not declare product missions in /api/init, so this audit uses the same default platform-docs mission set as the Stripe audit.",
+  "agent_api_root": null,
+  "source_urls": [
+    "https://linear.app/llms.txt",
+    "https://linear.app/docs/mcp",
+    "https://linear.app/developers/graphql?noRedirect=1",
+    "https://linear.app/developers/agents",
+    "https://raw.githubusercontent.com/linear/linear/master/packages/sdk/src/schema.graphql",
+    "https://linear.app/pricing"
+  ],
+  "surface_fingerprint": {
+    "llms_txt": true,
+    "llms_full_txt": false,
+    "api_init": false,
+    "api_manifest": false,
+    "graphql_endpoint": "https://api.linear.app/graphql",
+    "graphql_schema": "external raw GitHub SDL linked from /llms.txt",
+    "mcp_server": "https://mcp.linear.app/mcp",
+    "evals_declared": false,
+    "content_hash": false,
+    "trust_packet": false,
+    "breaking_change_signal": false,
+    "http_cache_metadata": true,
+    "md_companions_per_doc": true
+  },
+  "declared_missions": [],
+  "default_mission_set_used": [
+    "find_capability",
+    "integrate_feature",
+    "api_reference",
+    "evaluate_pricing"
+  ],
+  "default_mission_set_rationale": "Linear exposes an agent-readable docs/developer index rather than explicit missions. These four synthetic missions test the operational jobs a platform-docs surface implies: discover a feature, integrate against the product, resolve API reference, and evaluate commercial fit.",
+  "per_mission": [
+    {
+      "mission": "find_capability",
+      "question": "Does this platform support X?",
+      "primary_surfaces": [
+        "/llms.txt",
+        "/docs/*.md"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt resolves and is organized by capability categories: AI, Issues, Projects, Integrations, Analytics, Administration, and Developers. A calling agent can locate candidate docs without search."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "The index and sampled Markdown companions resolve successfully, including /docs/mcp.md and /developers/graphql.md."
+        },
+        "internalize": {
+          "score": 3,
+          "evidence": "The index gives enough typed-by-section structure to map capability questions to docs. For example, MCP server and AI Agents are explicit entries under AI/Integrations, and GraphQL API/SDK entries are explicit under Developers."
+        },
+        "complete": {
+          "score": 3,
+          "evidence": "A capability-existence answer is reachable from the index and companion pages alone; no human prose scraping outside the agent docs is needed."
+        },
+        "verify": {
+          "score": 1,
+          "evidence": "Linear's /llms.txt and .md companions return cache headers, but no content_hash, last_modified, schema_version, breaking_changes_since, or signed trust packet. The raw GitHub GraphQL schema has an HTTP ETag, but that does not verify the whole agent surface."
+        }
+      },
+      "mrs": 2.6
+    },
+    {
+      "mission": "integrate_feature",
+      "question": "Can an agent plan and execute an integration with Linear?",
+      "primary_surfaces": [
+        "/llms.txt",
+        "/developers/graphql.md",
+        "/developers/agents",
+        "/developers/sdk.md",
+        "raw GraphQL SDL"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt links directly to GraphQL API, authentication, SDK, webhooks, and agent integration docs."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "The GraphQL getting-started page resolves and names https://api.linear.app/graphql as the public endpoint. The linked raw schema.graphql resolves from GitHub."
+        },
+        "internalize": {
+          "score": 2,
+          "evidence": "The docs contain enough operational detail to plan an integration, including OAuth/API-key auth and SDK usage, but the mission remains prose-and-doc driven rather than a typed task contract with required scopes, success criteria, or evals."
+        },
+        "complete": {
+          "score": 2,
+          "evidence": "A competent agent can generate an implementation plan or code from the docs and schema, but end-to-end completion requires credentials, workspace setup, and product-side auth. There is no unauthenticated test harness or mission-specific completion endpoint."
+        },
+        "verify": {
+          "score": 1,
+          "evidence": "The agent surface has no freshness/trust packet. The agents API page also labels Linear for Agents APIs as Developer Preview, so API stability cannot be verified from the agent surface."
+        }
+      },
+      "mrs": 2.2
+    },
+    {
+      "mission": "api_reference",
+      "question": "Can an agent find authoritative API reference for a field, object, or mutation?",
+      "primary_surfaces": [
+        "/llms.txt",
+        "/developers/graphql.md",
+        "raw GraphQL SDL"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt includes a Developers section and links the GraphQL SDL Schema Definition directly."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "The raw schema.graphql resolves with HTTP 200 and contains the schema, Query, Mutation, and typed object/input definitions."
+        },
+        "internalize": {
+          "score": 3,
+          "evidence": "The SDL is machine-parseable and strongly typed. A calling agent can inspect fields, inputs, enums, and mutation names without inferring them from prose."
+        },
+        "complete": {
+          "score": 3,
+          "evidence": "For reference lookup, the mission is complete once the agent resolves the SDL and extracts the relevant type or mutation contract."
+        },
+        "verify": {
+          "score": 2,
+          "evidence": "The GitHub raw schema response carries an ETag, which gives better artifact-level verification than most Markdown pages. However, /llms.txt does not publish the expected hash, schema version, update time, or breaking-change window, so verification is incomplete."
+        }
+      },
+      "mrs": 2.8
+    },
+    {
+      "mission": "evaluate_pricing",
+      "question": "Can an agent determine which plan is needed and what it costs?",
+      "primary_surfaces": [
+        "/llms.txt",
+        "/docs/billing-and-plans.md",
+        "/pricing"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt links Billing and plans under Administration, and the public pricing page is discoverable from the site navigation."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "Billing docs and /pricing resolve. The pricing page exposes Free, Basic, Business, and Enterprise tiers with feature rows."
+        },
+        "internalize": {
+          "score": 2,
+          "evidence": "Plan prices and many feature rows are exposed in page text, including Free, Basic at $10/user/month billed yearly, Business at $16/user/month billed yearly, and Enterprise custom. However, the data is page prose/table output, not typed pricing JSON."
+        },
+        "complete": {
+          "score": 2,
+          "evidence": "An agent can answer common plan-fit questions from the rendered pricing text, but nuanced feature entitlements are brittle because the comparison matrix is not published as a structured machine contract."
+        },
+        "verify": {
+          "score": 1,
+          "evidence": "No pricing content hash, last-modified field, schema version, or breaking-change signal is present on the agent surface. The page itself says pricing should be the most up-to-date source, but the agent cannot independently verify freshness."
+        }
+      },
+      "mrs": 2.2
+    }
+  ],
+  "site_mrs": 2.45,
+  "site_mrs_note": "Not directly comparable to principal-pattern sites; comparable to other platform-docs audits using the same synthetic mission set.",
+  "gaps_identified": [
+    "No /api/init or declared mission set; platform missions must be synthesized by the auditor.",
+    "No trust packet on /llms.txt or Markdown companions: no content_hash, last_modified, schema_version, or breaking_changes_since.",
+    "No llms-full.txt Markdown artifact; the path returns the web app shell rather than an agent-readable full corpus.",
+    "Pricing is available to agents as text/table output, but not as typed pricing JSON.",
+    "No eval-as-contract or unauthenticated integration test endpoint for agent workflows."
+  ],
+  "standout_strengths": [
+    "/llms.txt is concise, well-sectioned, and links both user docs and developer docs.",
+    "The public GraphQL SDL is linked directly and is machine-parseable.",
+    "The MCP server page is unusually agent-relevant, including Codex setup instructions and the remote MCP endpoint.",
+    "Linear's agent developer docs expose app actor, mentionable/assignable scopes, and related agent interaction concepts."
+  ],
+  "recommendations_to_principal": [
+    "Add a small trust packet to /llms.txt and every .md companion: schema_version, content_hash, last_modified, source_commit or build id, and breaking_changes_since.",
+    "Publish /api/init with a declared platform mission set such as find_capability, integrate_agent, query_graphql_reference, evaluate_plan_fit.",
+    "Expose pricing as /api/pricing.json with plan IDs, prices, billing periods, feature entitlements, and updated_at.",
+    "Make /llms-full.txt either return a full Markdown corpus or 404; returning the web app shell is misleading for agents.",
+    "Add a lightweight eval endpoint or downloadable fixture set for agent integrations so completion can be tested without a live customer workspace."
+  ],
+  "limitations_of_this_audit": [
+    "No authenticated Linear workspace was used, so completion scores do not exercise real GraphQL mutations, MCP tools, or OAuth flows.",
+    "The audit sampled representative docs rather than crawling every linked Markdown companion.",
+    "HTTP header checks were run on 2026-05-25 from Warsaw; cache behavior may vary by edge region."
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ax-mission.org/schemas/mission.v0.1.schema.json",
+  "title": "AX Mission v0.1",
+  "description": "Standalone schema for one AX Mission object. The full manifest schema is authoritative for complete manifests.",
+  "$ref": "ax-mission-manifest.v0.1.schema.json#/$defs/mission"
+}

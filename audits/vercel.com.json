@@ -1,0 +1,274 @@
+{
+  "schema_version": "1.0",
+  "target": "https://vercel.com",
+  "audited_at": "2026-05-25T10:05:00Z",
+  "auditor": "codex",
+  "pattern": "platform-docs",
+  "pattern_note": "Vercel ships a large agent-readable documentation surface at /llms.txt and /docs/llms-full.txt, plus an OpenAPI contract for the REST API. It does not declare a site-owned mission set through /api/init, so this audit uses the default platform-docs missions and adds a deployment-platform extension for domains/environment configuration.",
+  "agent_api_root": null,
+  "source_urls": [
+    "https://vercel.com/llms.txt",
+    "https://vercel.com/docs/llms-full.txt",
+    "https://vercel.com/docs/getting-started-with-vercel",
+    "https://vercel.com/docs/cli/deploy",
+    "https://vercel.com/docs/environment-variables",
+    "https://vercel.com/docs/domains",
+    "https://vercel.com/docs/rest-api",
+    "https://openapi.vercel.sh/",
+    "https://vercel.com/docs/pricing",
+    "https://vercel.com/pricing"
+  ],
+  "surface_fingerprint": {
+    "llms_txt": true,
+    "llms_full_txt": true,
+    "api_init": false,
+    "api_manifest": false,
+    "openapi": true,
+    "openapi_url": "https://openapi.vercel.sh/",
+    "rest_api_reference": true,
+    "cli_docs": true,
+    "mcp_docs": true,
+    "agent_resources": true,
+    "evals_declared": false,
+    "content_hash": false,
+    "trust_packet": false,
+    "breaking_change_signal": false,
+    "http_cache_metadata": true,
+    "artifact_last_updated_metadata": true,
+    "pricing_json": false
+  },
+  "declared_missions": [],
+  "default_mission_set_used": [
+    "find_capability",
+    "integrate_feature",
+    "api_reference",
+    "evaluate_pricing",
+    "configure_domain_or_env"
+  ],
+  "default_mission_set_rationale": "Vercel exposes an agent-readable docs corpus and API contract, not explicit product missions. The first four missions are the v0.2 platform-docs default. configure_domain_or_env is included as a deployment-platform extension because custom domains and environment variables are core completion steps for deploying software on Vercel.",
+  "per_mission": [
+    {
+      "mission": "find_capability",
+      "question": "Can an agent determine whether Vercel supports a capability, framework, runtime, API, or agent workflow?",
+      "auth_required": false,
+      "primary_surfaces": [
+        "/llms.txt",
+        "/docs/llms-full.txt",
+        "/docs/getting-started-with-vercel"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt resolves with HTTP 200 and starts by pointing to /docs/llms-full.txt. It organizes the docs into fundamentals, frameworks, deployment, domains, REST API, AI, MCP, agent resources, pricing, and product areas."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "/llms.txt and /docs/llms-full.txt resolve as text/plain. The full artifact is a multi-megabyte Markdown-like corpus with page delimiters, source URLs, and per-page last_updated metadata."
+        },
+        "internalize": {
+          "score": 3,
+          "evidence": "The docs index and full corpus are structured enough to map capability questions to canonical pages. The getting-started page explicitly covers CLI installation, agent support, deployment, storage integrations, MCP, and next-step docs."
+        },
+        "complete": {
+          "score": 3,
+          "evidence": "For capability lookup, an agent can answer from the agent-readable surfaces without scraping the rendered web app."
+        },
+        "verify": {
+          "score": 2,
+          "evidence": "/llms.txt and /docs/llms-full.txt return ETag and cache headers, and pages inside the full artifact include last_updated metadata. There is no site-owned trust packet with content_hash, schema_version, or breaking_changes_since."
+        }
+      },
+      "verify_evidence": {
+        "freshness": "/docs/llms-full.txt contains per-page last_updated timestamps; sampled pages showed 2026-05-25T09:38:27Z. HTTP headers for /llms.txt and /docs/llms-full.txt include ETag.",
+        "authority": "The entrypoints are served from vercel.com and source links point to Vercel docs pages.",
+        "success_contract": "Capability lookup has no runnable eval, but the source URL and structured docs artifact are enough to cite the answer."
+      },
+      "mrs": 2.8
+    },
+    {
+      "mission": "integrate_feature",
+      "question": "Can an agent deploy an app or feature to Vercel using the published agent-readable surface?",
+      "auth_required": true,
+      "primary_surfaces": [
+        "/docs/getting-started-with-vercel",
+        "/docs/cli/deploy",
+        "/docs/git",
+        "/docs/frameworks"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt links getting-started, CLI, deployment, framework, build, and project docs. The getting-started page describes installing the CLI, logging in, running vercel, and using vercel --prod."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "The full docs artifact resolves and includes the getting-started page and CLI deploy reference. The deploy reference documents stdout as the Deployment URL and stderr/exit-code handling for CI."
+        },
+        "internalize": {
+          "score": 3,
+          "evidence": "The CLI deploy docs expose concrete commands, options, and success semantics: vercel, vercel --prod, vercel deploy --prebuilt, --env, --build-env, --yes, --skip-domain, and stdout behavior."
+        },
+        "complete": {
+          "score": 2,
+          "evidence": "An agent can generate the correct command sequence and CI handling from the docs, but live completion requires a Vercel account, authentication, project ownership, and side-effecting deployment."
+        },
+        "verify": {
+          "score": 2,
+          "evidence": "The CLI docs define an operational success signal: stdout is the Deployment URL and nonzero exit code indicates error. This helps verify local command success, but the site does not publish a non-side-effecting deployment eval or mission-specific completion contract."
+        }
+      },
+      "verify_evidence": {
+        "freshness": "The sampled getting-started and CLI deploy pages in /docs/llms-full.txt include last_updated timestamps from 2026-05-25.",
+        "authority": "The docs are canonical vercel.com docs and the CLI command semantics are documented in the Vercel CLI reference.",
+        "success_contract": "CLI stdout, stderr, and exit-code semantics are documented, but there is no unauthenticated fixture or validation endpoint for deployment completion."
+      },
+      "mrs": 2.6
+    },
+    {
+      "mission": "api_reference",
+      "question": "Can an agent find authoritative API reference for Vercel projects, deployments, domains, teams, or environment variables?",
+      "auth_required": false,
+      "primary_surfaces": [
+        "/llms.txt",
+        "/docs/rest-api",
+        "https://openapi.vercel.sh/"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt links REST API Reference and explicitly names the OpenAPI spec at https://openapi.vercel.sh/."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "https://openapi.vercel.sh/ resolves with HTTP 200 as application/json and begins with an OpenAPI 3.0.3 document for the Vercel API."
+        },
+        "internalize": {
+          "score": 3,
+          "evidence": "The OpenAPI document defines the production server https://api.vercel.com, bearer-token security, paths, operations, parameters, response schemas, and endpoint tags."
+        },
+        "complete": {
+          "score": 3,
+          "evidence": "For reference lookup, the mission is complete once the agent resolves the OpenAPI spec or generated REST API page and extracts the relevant operation contract."
+        },
+        "verify": {
+          "score": 2,
+          "evidence": "The OpenAPI endpoint returns Last-Modified and ETag headers, and the docs artifact links it as the complete endpoint contract. It still lacks a published expected hash, schema version policy, or breaking-change window from /llms.txt."
+        }
+      },
+      "verify_evidence": {
+        "freshness": "https://openapi.vercel.sh/ returned Last-Modified: Mon, 25 May 2026 07:21:42 GMT and ETag during the audit.",
+        "authority": "The OpenAPI spec is linked from Vercel's REST API docs and served from openapi.vercel.sh for the Vercel API.",
+        "success_contract": "OpenAPI gives a machine-readable reference contract for endpoint shape, though not a runnable conformance test."
+      },
+      "mrs": 2.8
+    },
+    {
+      "mission": "evaluate_pricing",
+      "question": "Can an agent determine plan fit, included usage, and usage-based pricing?",
+      "auth_required": false,
+      "primary_surfaces": [
+        "/llms.txt",
+        "/docs/pricing",
+        "/docs/plans",
+        "/pricing"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt and /docs/llms-full.txt expose Pricing, Plans, regional pricing, and product-specific pricing pages."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "/docs/pricing resolves inside the full docs artifact and /pricing returns HTTP 200. The docs include plan categories, billable resources, included usage, on-demand rates, add-ons, and regional pricing."
+        },
+        "internalize": {
+          "score": 2,
+          "evidence": "Pricing is highly structured in Markdown tables, including resources, units, included quantities, and rates. However, the canonical data is not exposed as typed pricing JSON with plan IDs, product SKUs, updated_at, or stable field semantics."
+        },
+        "complete": {
+          "score": 2,
+          "evidence": "An agent can answer common plan-fit and resource-pricing questions from the tables, but precise billing simulation remains brittle because prices span multiple pages and region-specific tables rather than one machine contract."
+        },
+        "verify": {
+          "score": 2,
+          "evidence": "The pricing docs in /docs/llms-full.txt include last_updated metadata and the HTML pricing page returns ETag/cache headers. There is no pricing content hash, versioned pricing schema, or explicit pricing changelog in the agent surface."
+        }
+      },
+      "verify_evidence": {
+        "freshness": "The sampled /docs/pricing section in /docs/llms-full.txt had last_updated 2026-05-25T09:38:27Z; /pricing returned ETag and cache headers.",
+        "authority": "Pricing docs and /pricing are served by Vercel and cross-link each other.",
+        "success_contract": "No typed pricing JSON or billing-estimate fixture is exposed for deterministic verification."
+      },
+      "mrs": 2.4
+    },
+    {
+      "mission": "configure_domain_or_env",
+      "question": "Can an agent configure deployment-critical domains or environment variables from the published surfaces?",
+      "auth_required": true,
+      "primary_surfaces": [
+        "/docs/environment-variables",
+        "/docs/cli/env",
+        "/docs/domains",
+        "/docs/rest-api",
+        "https://openapi.vercel.sh/"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt and the full docs artifact expose Environment Variables, Domains, CLI env commands, and REST API endpoints for project/domain/environment-variable workflows."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "The environment variable docs resolve in /docs/llms-full.txt with steps, environment scopes, limits, and CLI references. The REST API corpus includes project-domain and environment-variable endpoint references."
+        },
+        "internalize": {
+          "score": 2,
+          "evidence": "The docs provide operational instructions and the OpenAPI spec provides endpoint shapes, but a full domain/env task requires bridging between dashboard prose, CLI commands, REST scopes, DNS state, and account/project identifiers."
+        },
+        "complete": {
+          "score": 2,
+          "evidence": "An agent can produce the correct configuration plan or API/CLI calls, but live completion requires credentials, project/team permissions, DNS ownership, and side effects."
+        },
+        "verify": {
+          "score": 2,
+          "evidence": "The docs specify some success conditions such as redeployment after env changes and domain verification/configuration concepts, and the OpenAPI spec has ETag/Last-Modified. There is no non-side-effecting test fixture or declared mission completion proof."
+        }
+      },
+      "verify_evidence": {
+        "freshness": "The sampled environment-variable docs in /docs/llms-full.txt had last_updated 2026-05-25T09:38:27Z; OpenAPI returned Last-Modified and ETag.",
+        "authority": "The domain/env guidance is canonical Vercel documentation and the API operations are in Vercel's OpenAPI contract.",
+        "success_contract": "Operational success depends on authenticated project state and DNS; no public validation fixture is exposed."
+      },
+      "mrs": 2.4
+    }
+  ],
+  "site_mrs": 2.6,
+  "site_mrs_note": "Comparable to platform-docs audits, with one deployment-platform extension mission. Vercel ties the current AI-platform-docs score mostly because it combines /llms-full.txt freshness metadata with a strong OpenAPI contract.",
+  "gaps_identified": [
+    "No /api/init or declared platform mission set; missions must be synthesized from the docs taxonomy.",
+    "No site-owned trust packet on /llms.txt or /docs/llms-full.txt: no published content_hash, schema_version, source/build ID, or breaking_changes_since.",
+    "No eval-as-contract or unauthenticated deployment/configuration fixture for agent workflows.",
+    "Pricing is structured in docs tables, but not exposed as typed pricing JSON with stable plan/resource identifiers.",
+    "Operational completion for deployment, domains, env vars, and project changes requires credentials and side effects, so public audit completion is necessarily partial."
+  ],
+  "standout_strengths": [
+    "/llms.txt is large, current, and points directly to /docs/llms-full.txt.",
+    "/docs/llms-full.txt includes source URLs and per-page last_updated metadata, which is stronger freshness evidence than bare cache headers.",
+    "The REST API OpenAPI endpoint is public, machine-readable, and carries ETag plus Last-Modified headers.",
+    "CLI docs define command-level success signals such as stdout being the Deployment URL and nonzero exit status indicating failure.",
+    "The getting-started docs explicitly mention agent support, Vercel Plugin, Skills, MCP, and CLI workflows."
+  ],
+  "recommendations_to_principal": [
+    "Add /api/init or an equivalent machine-readable mission declaration for core platform jobs such as deploy_app, configure_domain, manage_env, inspect_deployment, and evaluate_plan_fit.",
+    "Publish a trust packet for /llms.txt and /docs/llms-full.txt with schema_version, content_hash, source build ID, generated_at, and breaking_changes_since.",
+    "Expose /pricing.json with plan IDs, resource IDs, units, included usage, regional multipliers, billing periods, and updated_at.",
+    "Link the OpenAPI spec from the top of /llms.txt with expected ETag or content hash so agents can verify the contract they fetched.",
+    "Provide a non-side-effecting sandbox fixture or validation workflow for deployment/configuration agents."
+  ],
+  "limitations_of_this_audit": [
+    "No authenticated Vercel account was used, so deployment and configuration missions were not executed against a live project.",
+    "The audit sampled representative sections of /docs/llms-full.txt rather than crawling every linked page.",
+    "HTTP header checks were run on 2026-05-25 from Warsaw; cache and edge headers may vary by region.",
+    "Vercel's docs and pricing pages are active surfaces and may change after this snapshot."
+  ]
+}

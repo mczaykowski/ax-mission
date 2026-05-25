@@ -1,0 +1,220 @@
+{
+  "schema_version": "0.1",
+  "id": "com.mczaykowski",
+  "name": "MC Zaykowski",
+  "description": "Principal-oriented missions for representing, evaluating, or contacting MC Zaykowski.",
+  "updated_at": "2026-05-25T00:00:00Z",
+  "publisher": {
+    "name": "MC Zaykowski",
+    "url": "https://mczaykowski.com"
+  },
+  "entrypoints": [
+    {
+      "url": "https://api.mczaykowski.com/api/init",
+      "type": "canonical",
+      "description": "Principal API init endpoint"
+    },
+    {
+      "url": "https://mczaykowski.com/.well-known/ax-mission.json",
+      "type": "compatibility",
+      "description": "Static AX Mission Manifest mirror"
+    }
+  ],
+  "links": [
+    {
+      "url": "https://mczaykowski.com",
+      "type": "homepage",
+      "description": "Human-facing homepage"
+    }
+  ],
+  "missions": [
+    {
+      "id": "evaluate_collaboration",
+      "title": "Evaluate collaboration fit",
+      "description": "Assess whether a proposed collaboration is a good fit using current public and principal-provided evidence.",
+      "category": "principal",
+      "surfaces": [
+        {
+          "url": "https://api.mczaykowski.com/api/init",
+          "type": "api",
+          "format": "application/json",
+          "required": true
+        },
+        {
+          "url": "https://api.mczaykowski.com/api/context",
+          "type": "api",
+          "format": "application/json",
+          "required": true
+        }
+      ],
+      "auth": {
+        "required": false,
+        "type": "none",
+        "side_effects": "none",
+        "human_approval_required": false
+      },
+      "input_schema": {
+        "type": "object",
+        "required": [
+          "collaboration_goal"
+        ],
+        "properties": {
+          "collaboration_goal": {
+            "type": "string"
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "required": [
+          "recommendation",
+          "reasons",
+          "citations",
+          "confidence"
+        ],
+        "properties": {
+          "recommendation": {
+            "enum": [
+              "yes",
+              "no",
+              "maybe"
+            ]
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "success": [
+        {
+          "id": "recommendation_is_cited",
+          "description": "Every material claim in the recommendation is tied to source evidence.",
+          "verify_with": "citations_resolve"
+        },
+        {
+          "id": "uncertainty_is_reported",
+          "description": "The result includes a confidence score and explicit uncertainty when evidence is incomplete.",
+          "verify_with": "output_schema"
+        }
+      ],
+      "verify": {
+        "freshness": "Use the endpoint trust packet, content hashes, and last_modified metadata.",
+        "authority": "Use the API host declared by the principal as the source of truth.",
+        "success_contract": "The response must satisfy output_schema and every reason must be backed by at least one citation."
+      }
+    },
+    {
+      "id": "prepare_introduction",
+      "title": "Prepare an introduction",
+      "description": "Prepare a concise introduction for a specific audience and purpose.",
+      "category": "principal",
+      "surfaces": [
+        {
+          "url": "https://api.mczaykowski.com/api/context",
+          "type": "api",
+          "format": "application/json",
+          "required": true
+        },
+        {
+          "url": "https://mczaykowski.com",
+          "type": "documentation",
+          "format": "text/html",
+          "required": false
+        }
+      ],
+      "auth": {
+        "required": false,
+        "type": "none",
+        "side_effects": "none",
+        "human_approval_required": false
+      },
+      "input_schema": {
+        "type": "object",
+        "required": [
+          "audience",
+          "purpose"
+        ],
+        "properties": {
+          "audience": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "tone": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "required": [
+          "introduction",
+          "citations"
+        ],
+        "properties": {
+          "introduction": {
+            "type": "string"
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "success": [
+        {
+          "id": "intro_is_purpose_fit",
+          "description": "The introduction is tailored to the stated audience and purpose.",
+          "verify_with": "operator_review"
+        }
+      ],
+      "verify": {
+        "freshness": "Use current API context metadata.",
+        "authority": "Use only principal-owned sources unless the input requests external context.",
+        "success_contract": "The final introduction must include citations for specific factual claims."
+      }
+    }
+  ],
+  "trust": {
+    "updated_at": "2026-05-25T00:00:00Z",
+    "authority": "https://api.mczaykowski.com",
+    "generated_by": "principal-agent-api",
+    "content_hashes": [
+      {
+        "url": "https://api.mczaykowski.com/api/init",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "breaking_changes_since": null,
+    "changelog": "https://api.mczaykowski.com/api/changelog"
+  }
+}

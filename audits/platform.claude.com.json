@@ -1,0 +1,271 @@
+{
+  "schema_version": "1.0",
+  "target": "https://platform.claude.com/docs",
+  "audited_at": "2026-05-25T09:39:00Z",
+  "auditor": "codex",
+  "pattern": "ai-platform-docs",
+  "pattern_note": "Anthropic ships a large AI-native documentation index at /llms.txt, an advertised /llms-full.txt corpus, generated Markdown API reference pages, pricing docs, model APIs, tool/MCP docs, and guardrail docs. It does not declare missions in /api/init, so this audit uses a platform-docs mission set extended with model selection and safety/policy verification.",
+  "agent_api_root": null,
+  "source_urls": [
+    "https://platform.claude.com/llms.txt",
+    "https://platform.claude.com/llms-full.txt",
+    "https://platform.claude.com/docs/en/get-started.md",
+    "https://platform.claude.com/docs/en/api/messages.md",
+    "https://platform.claude.com/docs/en/api/models/list.md",
+    "https://platform.claude.com/docs/en/about-claude/pricing.md",
+    "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/handle-streaming-refusals.md"
+  ],
+  "surface_fingerprint": {
+    "llms_txt": true,
+    "llms_full_txt": true,
+    "api_init": false,
+    "api_manifest": false,
+    "openapi": false,
+    "generated_api_reference": true,
+    "model_api": "GET /v1/models",
+    "mcp_docs": true,
+    "evals_declared": false,
+    "content_hash": false,
+    "trust_packet": false,
+    "breaking_change_signal": false,
+    "http_cache_metadata": true,
+    "last_modified_headers": true,
+    "etag_headers": true,
+    "md_companions_per_doc": true
+  },
+  "declared_missions": [],
+  "default_mission_set_used": [
+    "find_capability",
+    "integrate_feature",
+    "api_reference",
+    "evaluate_pricing",
+    "verify_safety_or_policy",
+    "select_model_for_task"
+  ],
+  "default_mission_set_rationale": "Claude docs are a platform-docs surface, not a principal mission surface. The default missions test capability discovery, implementation, API reference extraction, pricing fit, safety/policy handling, and model selection, which are the operational jobs an agent would naturally attempt against an AI platform.",
+  "per_mission": [
+    {
+      "mission": "find_capability",
+      "question": "Can an agent determine whether Claude supports a capability such as MCP, tool use, prompt caching, citations, files, or code execution?",
+      "primary_surfaces": [
+        "/llms.txt",
+        "/llms-full.txt",
+        "/docs/en/**/*.md"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt resolves at the platform root, indexes 1541 English pages, advertises multilingual coverage, and groups capabilities under sections such as Messages, tool use, MCP, models, admin APIs, and pricing."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "The index, /llms-full.txt, and sampled Markdown pages resolve successfully, including get-started.md, api/messages.md, api/models/list.md, pricing.md, and streaming refusal docs."
+        },
+        "internalize": {
+          "score": 3,
+          "evidence": "The index is organized enough for a calling agent to map capability questions to concrete docs. Many links include short descriptors, and generated API pages expose endpoint names, parameters, and return fields."
+        },
+        "complete": {
+          "score": 3,
+          "evidence": "A capability-existence answer is reachable from the index and companion Markdown without general web search or scraping human-only UI."
+        },
+        "verify": {
+          "score": 2,
+          "evidence": "/llms.txt and sampled Markdown pages expose Last-Modified and ETag headers, which is better than a bare docs index. They do not publish a content_hash, schema_version, source commit, breaking_changes_since field, or signed trust packet."
+        }
+      },
+      "mrs": 2.8
+    },
+    {
+      "mission": "integrate_feature",
+      "question": "Can an agent plan and implement a Claude API feature such as Messages API calls, tool use, or MCP integration?",
+      "primary_surfaces": [
+        "/llms.txt",
+        "/docs/en/get-started.md",
+        "/docs/en/api/messages.md",
+        "/docs/en/agents-and-tools/**/*.md"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt links get-started, Messages API, tool use, MCP connector, remote MCP servers, and SDK/API references directly."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "The get-started page resolves and gives a concrete cURL API call against https://api.anthropic.com/v1/messages. The Messages API reference resolves as generated Markdown."
+        },
+        "internalize": {
+          "score": 2,
+          "evidence": "The integration path is clear and examples are concrete, but the surface is still documentation prose plus generated reference rather than a typed mission contract with required scopes, expected side effects, and success criteria."
+        },
+        "complete": {
+          "score": 2,
+          "evidence": "A calling agent can produce code and an implementation plan from the docs, but end-to-end completion requires an Anthropic account, API key, billing state, and live API execution. There is no unauthenticated test fixture or mission-specific completion endpoint."
+        },
+        "verify": {
+          "score": 2,
+          "evidence": "The docs carry HTTP freshness metadata, but there is no executable integration eval or versioned trust packet proving the implementation path is current and still passing."
+        }
+      },
+      "mrs": 2.4
+    },
+    {
+      "mission": "api_reference",
+      "question": "Can an agent find authoritative request/response fields for an endpoint?",
+      "primary_surfaces": [
+        "/llms.txt",
+        "/docs/en/api/messages.md",
+        "/docs/en/api/models/list.md"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt includes generated API pages for Messages, Models, Admin APIs, beta endpoints, SDK variants, and CLI/SDK language surfaces."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "api/messages.md and api/models/list.md resolve as Markdown. Messages documents POST /v1/messages; List Models documents GET /v1/models."
+        },
+        "internalize": {
+          "score": 3,
+          "evidence": "Generated API pages expose parameter names, types, enums, nested object structures, headers, and response shapes. For example, List Models returns data: array of ModelInfo with capability fields."
+        },
+        "complete": {
+          "score": 3,
+          "evidence": "For reference lookup, the mission is complete once the agent resolves the generated Markdown and extracts the required field, parameter, or endpoint contract."
+        },
+        "verify": {
+          "score": 2,
+          "evidence": "Generated Markdown pages have Last-Modified and ETag headers. However, there is no single OpenAPI/JSON schema file or documented hash chain linked from /llms.txt, so verification remains artifact-level rather than contract-level."
+        }
+      },
+      "mrs": 2.8
+    },
+    {
+      "mission": "evaluate_pricing",
+      "question": "Can an agent determine which model or feature pricing applies?",
+      "primary_surfaces": [
+        "/llms.txt",
+        "/docs/en/about-claude/pricing.md",
+        "https://claude.com/pricing"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt links the pricing page through the docs corpus. The pricing page itself points to claude.com/pricing for the most current public pricing."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "pricing.md resolves as Markdown and includes model pricing, prompt caching pricing, cloud platform pricing, Claude Platform on AWS pricing, data residency pricing, and feature-specific pricing."
+        },
+        "internalize": {
+          "score": 3,
+          "evidence": "The pricing table is structured in Markdown with per-model input, cache write, cache hit, and output token prices. It also defines MTok and lists feature-specific multipliers."
+        },
+        "complete": {
+          "score": 2,
+          "evidence": "An agent can answer common price questions and compute token-cost estimates from the table, but negotiated discounts, marketplace private offers, regional routing, and live account billing state remain outside the public agent surface."
+        },
+        "verify": {
+          "score": 2,
+          "evidence": "The Markdown page has Last-Modified and ETag headers and explicitly points to claude.com/pricing for current pricing. It still lacks a typed pricing JSON contract, content_hash, or breaking-change signal."
+        }
+      },
+      "mrs": 2.6
+    },
+    {
+      "mission": "verify_safety_or_policy",
+      "question": "Can an agent determine how to handle safety, refusal, or guardrail behavior for an integration?",
+      "primary_surfaces": [
+        "/llms.txt",
+        "/docs/en/test-and-evaluate/strengthen-guardrails/handle-streaming-refusals.md",
+        "/docs/en/agents-and-tools/tool-use/**/*.md"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt exposes safety-relevant docs such as Streaming refusals and other test-and-evaluate/guardrail material."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "handle-streaming-refusals.md resolves as Markdown and documents stop_reason: \"refusal\", response shape, reset guidance, and implementation examples."
+        },
+        "internalize": {
+          "score": 2,
+          "evidence": "The refusal handling contract is clear for streaming refusals, but broader policy compliance remains prose and linked support/policy material rather than a typed machine policy or evaluator."
+        },
+        "complete": {
+          "score": 2,
+          "evidence": "An agent can implement refusal detection and reset behavior from the docs, but cannot verify broader safety compliance without running live requests or external evals."
+        },
+        "verify": {
+          "score": 2,
+          "evidence": "The specific Markdown page has Last-Modified and ETag headers. There is no runnable policy eval endpoint or signed safety contract for a caller to prove compliance."
+        }
+      },
+      "mrs": 2.4
+    },
+    {
+      "mission": "select_model_for_task",
+      "question": "Can an agent select an appropriate Claude model for a task using current capabilities and availability?",
+      "primary_surfaces": [
+        "/llms.txt",
+        "/docs/en/api/models/list.md",
+        "/docs/en/about-claude/pricing.md"
+      ],
+      "phases": {
+        "discover": {
+          "score": 3,
+          "evidence": "/llms.txt links Models docs, List Models, Get a Model, pricing, context windows, citations, code execution, and other capability docs relevant to model choice."
+        },
+        "resolve": {
+          "score": 3,
+          "evidence": "api/models/list.md resolves and documents GET /v1/models. It states that the API response lists available models and that more recently released models are listed first."
+        },
+        "internalize": {
+          "score": 3,
+          "evidence": "The List Models response shape includes ModelInfo and nested ModelCapabilities such as batch, citations, code_execution, context_management, and other support flags."
+        },
+        "complete": {
+          "score": 2,
+          "evidence": "The public docs let an agent design a model-selection decision, but determining live availability requires API credentials and account context. The docs do not provide a public unauthenticated model registry snapshot."
+        },
+        "verify": {
+          "score": 2,
+          "evidence": "The model API page has Last-Modified and ETag headers, and the live API can verify availability for authenticated callers. The public agent surface does not publish a signed model availability snapshot."
+        }
+      },
+      "mrs": 2.6
+    }
+  ],
+  "site_mrs": 2.6,
+  "site_mrs_note": "Not comparable to principal-pattern sites; comparable to platform-docs and AI-platform-docs audits. Claude docs score above Linear mainly because the API reference, model, pricing, and safety docs are broader and fresher, but Verify still lacks first-class trust packets and executable eval contracts.",
+  "gaps_identified": [
+    "No /api/init or declared mission set; missions are inferred from the documentation corpus.",
+    "No content_hash, schema_version, source commit, breaking_changes_since, or signed trust packet linked from /llms.txt.",
+    "No single public OpenAPI/JSON schema file was discovered from /llms.txt, despite generated API reference pages.",
+    "No unauthenticated integration test harness or mission-specific eval endpoint for validating an implementation.",
+    "Pricing is well structured in Markdown but not exposed as typed pricing JSON.",
+    "Safety/refusal guidance is useful, but broader policy compliance is not machine-verifiable from an agent-native eval contract."
+  ],
+  "standout_strengths": [
+    "The docs expose both /llms.txt and /llms-full.txt, with a large English corpus and multilingual awareness.",
+    "Generated API reference pages are machine-readable enough for parameter and response extraction.",
+    "The Models API includes structured capability fields, which is unusually helpful for model-selection missions.",
+    "Pricing is present in Markdown and detailed enough for many token-cost calculations.",
+    "Safety-relevant docs include concrete refusal response fields and implementation examples."
+  ],
+  "recommendations_to_principal": [
+    "Add a trust packet to /llms.txt, /llms-full.txt, and generated Markdown pages: content_hash, schema_version, source_commit, last_modified, and breaking_changes_since.",
+    "Publish a small /api/init-style mission manifest for common caller jobs such as integrate_messages_api, choose_model, estimate_cost, configure_mcp, and handle_refusals.",
+    "Expose a single machine-readable API contract from the docs index, even if generated from the same source as the Markdown API reference.",
+    "Publish typed pricing JSON with model IDs, token classes, feature multipliers, regional multipliers, and updated_at.",
+    "Provide downloadable eval fixtures or a non-side-effecting validation endpoint so agents can verify integration behavior without live credentials."
+  ],
+  "limitations_of_this_audit": [
+    "No authenticated Anthropic account or API key was used; completion scores do not exercise live API calls.",
+    "The audit sampled representative docs rather than reading all 1541 English pages.",
+    "Some docs paths return HTML when a guessed Markdown route is wrong, so this audit only scores pages confirmed through /llms.txt or successful Markdown fetches.",
+    "HTTP checks were run on 2026-05-25 from Warsaw; cache and bot-protection behavior may vary by edge location."
+  ]
+}
