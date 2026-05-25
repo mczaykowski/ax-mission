@@ -164,14 +164,6 @@ Detail: [`audits/platform.claude.com.json`](./audits/platform.claude.com.json)
 - Auth-gated systems can be reachable in principle while still impossible to fully complete in a public unauthenticated audit.
 - Scoring is calibrated by working examples, not yet by inter-rater reliability at scale.
 
-## Next steps
-
-- [ ] Re-audit `api.mczaykowski.com/api/init` under the v0.2 schema.
-- [ ] Audit `developers.cloudflare.com` to test infrastructure-platform missions.
-- [ ] Add at least two more principal-pattern targets.
-- [ ] Find one CRM/support/business platform with `/llms.txt`, OpenAPI, or another agent-readable surface.
-- [ ] Consider a small `axmra` scaffold after one infrastructure target and the principal re-audit, so the target schema and default mission sets are less speculative.
-
 ## Repository
 
 ```text
