@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "AX Mission Standard v0.1: a minimal mission manifest for agent-readable websites.",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "validate": "node tools/validate-agent-json.mjs examples/minimal.agent.json examples/principal.agent.json examples/platform.agent.json",

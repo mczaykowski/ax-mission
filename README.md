@@ -231,3 +231,9 @@ v0.1 is intentionally narrow. Future versions may add:
 - conformance test suite
 
 Breaking changes must increment the minor version and include migration notes.
+
+## License
+
+Released under the [MIT License](./LICENSE). The spec, schemas, examples, and reference tooling are free to implement, adapt, and build on — adoption is the point.
+
+Reference implementation: [`api.mczaykowski.com/api/init`](https://api.mczaykowski.com/api/init).
